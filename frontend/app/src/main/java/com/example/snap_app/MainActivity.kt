@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,6 +42,7 @@ class MainActivity : ComponentActivity() {
 
 /* -------------------- Screens & Routes -------------------- */
 sealed class Screen(val route: String, val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
+    object Welcome : Screen("welcome", "Welcome", Icons.Default.Info)
     object Home : Screen("home", "Home", Icons.Default.Home)
     object Profile : Screen("profile", "Profile", Icons.Default.Person)
     object Messages : Screen("messages", "Messages", Icons.Default.Chat)
@@ -61,16 +63,57 @@ val bottomNavItems = listOf(
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
+    val currentBackStack by navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStack?.destination?.route
+
+    var name by rememberSaveable { mutableStateOf("") }
+    var gender by rememberSaveable { mutableStateOf("") }
+    var height by rememberSaveable { mutableStateOf("") }
+    var weight by rememberSaveable { mutableStateOf("") }
+
+    var workoutsPerWeek by rememberSaveable { mutableStateOf("") }
+    var workoutDuration by rememberSaveable { mutableStateOf("") }
+    var targetPhysique by rememberSaveable { mutableStateOf("") }
+
+    var dietaryRestriction by rememberSaveable { mutableStateOf("") }
+    var preferredCuisine by rememberSaveable { mutableStateOf("") }
 
     Scaffold(
         containerColor = DarkBlue, // Dark blue background
-        bottomBar = { BottomNavigationBar(navController = navController) }
+        bottomBar = {
+            if (currentRoute != Screen.Welcome.route) {
+                BottomNavigationBar(navController = navController)
+            }
+        }
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = Screen.Welcome.route,
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable(Screen.Welcome.route) {
+                WelcomeScreen(
+                    name = name,
+                    onNameChange = { name = it },
+                    gender = gender,
+                    onGenderChange = { gender = it },
+                    height = height,
+                    onHeightChange = { height = it },
+                    weight = weight,
+                    onWeightChange = { weight = it },
+                    workoutsPerWeek = workoutsPerWeek,
+                    onWorkoutsPerWeekChange = { workoutsPerWeek = it },
+                    workoutDuration = workoutDuration,
+                    onWorkoutDurationChange = { workoutDuration = it },
+                    targetPhysique = targetPhysique,
+                    onTargetPhysiqueChange = { targetPhysique = it },
+                    dietaryRestriction = dietaryRestriction,
+                    onDietaryRestrictionChange = { dietaryRestriction = it },
+                    preferredCuisine = preferredCuisine,
+                    onPreferredCuisineChange = { preferredCuisine = it },
+                    onContinue = { navController.navigate(Screen.Home.route) }
+                )
+            }
             composable(Screen.Home.route) { HomeScreen() }
             // make screens here guys!
             //composable(Screen.Profile.route) { ProfileScreen() }
