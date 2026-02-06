@@ -21,3 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "snap_app"
 include(":app")
+
+
