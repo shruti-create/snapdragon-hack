@@ -9,50 +9,27 @@ local.properties
 # macOS
 .DS_Store
 
-firestore_key.json
-**/__pycache__/
-.env
-
-# Documentation
-*.md
-!README.md
-
 # Python
-.venv/
+**/__pycache__/
+myenv/
 venv/
-env/
 *.pyc
-*.pyo
-*.pyd
-.Python
-pip-log.txt
-pip-delete-this-directory.txt
-.pytest_cache/
-.coverage
-htmlcov/
-*.egg-info/
-dist/
-build/
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# Environment and secrets
+.env
+firestore_key.json
+*firebase-adminsdk*.json
 
-# Build artifacts
-app/build/
-frontend/build/
-*.apk
-*.aab
+# Qualcomm/Snapdragon DLLs (large binaries)
+*.dll
 
-# Model files and temporary directories
-.qaihm/
-llama_model/
-snap_models_temp/
-**/models/llm/
+# Models (large files)
+models/
+models-*/
 
-# OS
-Thumbs.db
-.DS_Store
+# Logs
+*.log
+error_log.txt
+
+# Test files
+test_engine.py
