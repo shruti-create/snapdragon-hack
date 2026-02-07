@@ -58,7 +58,6 @@ sealed class Screen(val route: String, val label: String, val icon: androidx.com
 
 val bottomNavItems = listOf(
     Screen.Home,
-    Screen.Messages,
     Screen.Nutrition,
     Screen.Gym,
     Screen.Reminders
