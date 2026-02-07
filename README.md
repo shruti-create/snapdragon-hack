@@ -22,11 +22,20 @@ Together, these models continuously adjust recommendations based on user activit
 
 ## Team Members
 
-- **Shruti Bhamidipadi**  
-  Email: sh@columbia.edu
+- **Shruti Bhamidipati**  
+  Email: sb5197@columbia.edu
 
-- **Raghav**  
-  Email: rk@columbia.edu
+- **Raghav Sampath**  
+  Email: rs4760@columbia.edu
+  
+- **Kartik Kumar Gounder**  
+  Email: kkg2125@columbia.edu
+  
+- **Anushk Pandey**  
+  Email: ap7151@nyu.edu
+  
+- **Aditya Pendyala**  
+  Email: ap4839@columbia.edu
 
 ---
 
