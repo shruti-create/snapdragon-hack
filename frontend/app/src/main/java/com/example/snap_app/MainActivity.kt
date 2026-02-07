@@ -159,7 +159,12 @@ fun MainScreen() {
             composable(Screen.Gym.route) { GymScreen() }
             composable(Screen.Nutrition.route) { NutritionScreen() }
             composable(Screen.Profile.route) { ScreenLayout("Profile") }
-            composable(Screen.Settings.route) { ScreenLayout("Settings") }
+            composable(Screen.Settings.route) {
+                SettingsScreen(
+                    userName = name,
+                    onBack = { navController.popBackStack() }
+                )
+            }
             composable(Screen.Chat.route) { ChatScreen() }
             //composable(Screen.Camera.route) { CameraScreen() }
         }
