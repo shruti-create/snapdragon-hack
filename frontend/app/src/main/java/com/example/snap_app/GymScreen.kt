@@ -1,28 +1,34 @@
 package com.example.snap_app
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 
-
-
 // Data Classes
 data class Exercise(
     @SerializedName("name") val name: String = "",
     @SerializedName("sets") val sets: String = "",
-    @SerializedName("reps") val reps: String = ""
+    @SerializedName("reps") val reps: String = "",
+    val completed: Boolean = false
 )
 
 data class WorkoutSession(
@@ -66,7 +72,7 @@ fun GymScreen() {
             }
           },
           "workout2": {
-            "completed": true,
+            "completed": false,
             "exercises": {
               "exercise1": {
                 "name": "Pull Ups",
@@ -85,7 +91,7 @@ fun GymScreen() {
     }
     """
 
-    val workouts = remember { parseWorkouts(jsonData) }
+    var workouts by remember { mutableStateOf(parseWorkouts(jsonData)) }
 
     Box(
         modifier = Modifier
@@ -113,8 +119,48 @@ fun GymScreen() {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(workouts) { workout ->
-                    WorkoutCard(workout)
+                items(workouts.size) { index ->
+                    val workout = workouts[index]
+                    WorkoutCard(
+                        workout = workout,
+                        onExerciseToggle = { exerciseIndex ->
+                            // Create new list with updated exercise
+                            val updatedExercises = workout.exercises.toMutableList()
+                            updatedExercises[exerciseIndex] = updatedExercises[exerciseIndex].copy(
+                                completed = !updatedExercises[exerciseIndex].completed
+                            )
+
+                            // Check if all exercises are completed
+                            val allCompleted = updatedExercises.all { it.completed }
+
+                            // Create new workout with updated exercises and completion status
+                            val updatedWorkout = workout.copy(
+                                exercises = updatedExercises,
+                                completed = allCompleted
+                            )
+
+                            // Update the workouts list
+                            workouts = workouts.toMutableList().apply {
+                                this[index] = updatedWorkout
+                            }
+                        },
+                        onWorkoutToggle = {
+                            // Toggle entire workout
+                            val newCompletedStatus = !workout.completed
+                            val updatedExercises = workout.exercises.map {
+                                it.copy(completed = newCompletedStatus)
+                            }
+
+                            val updatedWorkout = workout.copy(
+                                exercises = updatedExercises,
+                                completed = newCompletedStatus
+                            )
+
+                            workouts = workouts.toMutableList().apply {
+                                this[index] = updatedWorkout
+                            }
+                        }
+                    )
                 }
             }
         }
@@ -122,7 +168,11 @@ fun GymScreen() {
 }
 
 @Composable
-fun WorkoutCard(workout: WorkoutData) {
+fun WorkoutCard(
+    workout: WorkoutData,
+    onExerciseToggle: (Int) -> Unit,
+    onWorkoutToggle: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth(),
@@ -160,7 +210,7 @@ fun WorkoutCard(workout: WorkoutData) {
                     )
                 }
 
-                // Status Badge
+                // Status Badge - Clickable to toggle entire workout
                 Box(
                     modifier = Modifier
                         .background(
@@ -170,6 +220,7 @@ fun WorkoutCard(workout: WorkoutData) {
                                 Color.Gray.copy(alpha = 0.2f),
                             shape = RoundedCornerShape(20.dp)
                         )
+                        .clickable { onWorkoutToggle() }
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
@@ -186,16 +237,54 @@ fun WorkoutCard(workout: WorkoutData) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Progress indicator
+            val completedCount = workout.exercises.count { it.completed }
+            val totalCount = workout.exercises.size
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                LinearProgressIndicator(
+                    progress = { if (totalCount > 0) completedCount.toFloat() / totalCount else 0f },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    color = NeonPink,
+                    trackColor = Color.Gray.copy(alpha = 0.3f)
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(
+                    text = "$completedCount/$totalCount",
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Exercises
             workout.exercises.forEachIndexed { index, exercise ->
-                ExerciseItem(exercise, isLast = index == workout.exercises.size - 1)
+                ExerciseItem(
+                    exercise = exercise,
+                    isLast = index == workout.exercises.size - 1,
+                    onToggle = { onExerciseToggle(index) }
+                )
             }
         }
     }
 }
 
 @Composable
-fun ExerciseItem(exercise: Exercise, isLast: Boolean) {
+fun ExerciseItem(
+    exercise: Exercise,
+    isLast: Boolean,
+    onToggle: () -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -203,26 +292,81 @@ fun ExerciseItem(exercise: Exercise, isLast: Boolean) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    color = Color(0xFF2A2A2A),
+                    color = if (exercise.completed)
+                        Color(0xFF4CAF50).copy(alpha = 0.1f)
+                    else
+                        Color(0xFF2A2A2A),
                     shape = RoundedCornerShape(12.dp)
                 )
+                .clickable { onToggle() }
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Checkbox
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (exercise.completed)
+                            NeonPink
+                        else
+                            Color.Transparent
+                    )
+                    .border(
+                        width = 2.dp,
+                        color = if (exercise.completed) NeonPink else Color.Gray,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (exercise.completed) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Completed",
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
             Text(
                 text = exercise.name,
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color.White,
+                color = if (exercise.completed)
+                    Color.White.copy(alpha = 0.6f)
+                else
+                    Color.White,
                 fontWeight = FontWeight.SemiBold,
+                textDecoration = if (exercise.completed)
+                    TextDecoration.LineThrough
+                else
+                    TextDecoration.None,
                 modifier = Modifier.weight(1f)
             )
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                InfoChip("${exercise.sets} sets", NeonPink.copy(alpha = 0.2f), NeonPink)
-                InfoChip("${exercise.reps} reps", Color(0xFF64B5F6).copy(alpha = 0.2f), Color(0xFF64B5F6))
+                InfoChip(
+                    text = "${exercise.sets} sets",
+                    backgroundColor = NeonPink.copy(alpha = if (exercise.completed) 0.1f else 0.2f),
+                    textColor = if (exercise.completed)
+                        NeonPink.copy(alpha = 0.5f)
+                    else
+                        NeonPink
+                )
+                InfoChip(
+                    text = "${exercise.reps} reps",
+                    backgroundColor = Color(0xFF64B5F6).copy(alpha = if (exercise.completed) 0.1f else 0.2f),
+                    textColor = if (exercise.completed)
+                        Color(0xFF64B5F6).copy(alpha = 0.5f)
+                    else
+                        Color(0xFF64B5F6)
+                )
             }
         }
 
@@ -273,7 +417,8 @@ fun parseWorkouts(jsonData: String): List<WorkoutData> {
                         Exercise(
                             name = exerciseData["name"] ?: "",
                             sets = exerciseData["sets"] ?: "",
-                            reps = exerciseData["reps"] ?: ""
+                            reps = exerciseData["reps"] ?: "",
+                            completed = false
                         )
                     } ?: emptyList()
 
@@ -294,4 +439,3 @@ fun parseWorkouts(jsonData: String): List<WorkoutData> {
 
     return workoutList
 }
-
