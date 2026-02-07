@@ -16,11 +16,25 @@ FuelForm consists of an Android application and a laptop-based AI system connect
 
 The Android app collects user health data through Android Health Connect and runs a lightweight general AI model locally to handle fast, on-device decisions and coordination. The phone syncs user state data to Firebase, which serves as the backend and communication layer.
 
-A connected laptop acts as the primary compute hub and runs two dedicated AI/ML models:
-- A **Nutrition Model** that adapts calorie targets, macro emphasis, and hydration goals
-- A **Fitness Model** that adapts workout intensity, duration, exercise category, and rest days
+A connected laptop acts as the primary compute hub and runs three dedicated AI/ML agents:
+- A **Nutrition Agent** that adapts calorie targets, macro emphasis, and hydration goals
+- A **Fitness Agent** that adapts workout intensity, duration, exercise category, and rest days
+- A **Chat Q/A Agent** that answers any questions the user may have about their health and fitness goals. 
 
-Together, these models continuously adjust recommendations based on user activity, recovery, and adherence, minimizing manual planning while promoting sustainable long-term progress.
+Together, these models continuously adjust recommendations based on user activity, recovery, and adherence, minimizing manual planning while promoting sustainable long-term progress. 
+
+**Note on Testing and Documentation:** We have dedicated unit tests for our frontend and thorough documentation throughout the repository. 
+
+## Feature Information
+- **Sign up/ Login** Features for data security
+- Preferences, health data, goals **initial self reporting** to use for fitness app
+- **Home screen** that presents a **silly cat meme** (sad, indifferent, happy) based on how many reminders were addressed (with food, workouts, water)
+- **Chat screen** to talk to the Chat Q/A agent (model hosted on phone) about health/fitnes
+- **Nutrition screen** with a personalized nutrition plan based on dietary restrictions, personal data, and fitness goals
+- **Gym screen** with personalized exercise plan for the week split into three different workouts
+- **Reminders screen** to log the daily meals, water consumption, and exercises of the user (Sends notifications to the phone at the relevant times of the day to prompt the user to log these)
+- **Settings Screen** to modify profile information
+- **Bonus Donut Finder Screen!** We're confident our users will be on track with their diet and fitness goals. As such, we provided a donut finder feature to show the donut shops around wherever the user is at any time :)
 
 ---
 
@@ -46,9 +60,10 @@ Together, these models continuously adjust recommendations based on user activit
 ## System Architecture
 
 - **Android App (`fuelform.apk`)**
-  - Runs a general AI model locally on the device
-  - Reads health and activity data via Android Health Connect
+  - Runs a general AI model locally on the device to answer questions
   - Displays workout and nutrition recommendations
+  - Provides helpful reminder notifications throughout the day
+  - Logs user meals and workouts daily
   - Syncs user state with Firebase
 
 - **Laptop (AI Compute Node)**
@@ -70,7 +85,6 @@ Together, these models continuously adjust recommendations based on user activit
 
 **Android Phone**
 - Android 9 (API level 28) or higher
-- Health Connect installed and enabled
 - USB debugging enabled (for APK installation)
 
 **Laptop**
