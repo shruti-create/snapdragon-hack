@@ -2,10 +2,14 @@ package com.example.snap_app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// FuelForm palette
+val DeepNavy = Color(0xFF111F35)
+val FuelRed = Color(0xFFF63049)
+val FuelMagenta = Color(0xFFD02752)
+val FuelBurgundy = Color(0xFF8A244B)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Surface variants
+val CardDark = Color(0xFF1A2A45)
+val CardAlt = Color(0xFF1E3050)
+val InputDark = Color(0xFF0D1828)
+val GradientEnd = Color(0xFF0D1828)

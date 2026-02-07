@@ -103,7 +103,7 @@ fun WelcomeScreen(
                 .fillMaxSize()
                 .align(Alignment.Center),
             shape = MaterialTheme.shapes.extraLarge,
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A2E))
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1A2A45))
         ) {
             Column(
                 modifier = Modifier

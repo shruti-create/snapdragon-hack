@@ -22,11 +22,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.snap_app.ui.theme.Snap_appTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 
-// Custom color scheme
-val DarkBlue = Color(0xFF0A1929)
-val NeonPink = Color(0xFFFF10F0)
-val Purple = Color(0xFF9C27B0)
+// FuelForm color scheme
+val DarkBlue = Color(0xFF111F35)
+val NeonPink = Color(0xFFF63049)
+val Purple = Color(0xFFD02752)
+val Burgundy = Color(0xFF8A244B)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,6 +59,7 @@ sealed class Screen(val route: String, val label: String, val icon: androidx.com
     object Settings : Screen("settings", "Settings", Icons.Default.Settings)
     object Gym : Screen("gym", "Gym", Icons.Default.SportsGymnastics)
     object Chat : Screen("chat", "Chat", Icons.Default.Mms)
+    object DonutShops : Screen("donut_shops", "Donut Shops", Icons.Default.Fastfood)
 
 }
 
@@ -68,6 +75,8 @@ val bottomNavItems = listOf(
 /* -------------------- Main Scaffold with Top App Bar & Bottom Nav -------------------- */
 @Composable
 fun MainScreen() {
+    val viewModel: AppViewModel = viewModel()
+
     val navController = rememberNavController()
     val currentBackStack by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStack?.destination?.route
@@ -154,12 +163,39 @@ fun MainScreen() {
                     onContinue = { navController.navigate(Screen.Home.route) }
                 )
             }
-            composable(Screen.Home.route) { HomeScreen() }
-            composable(Screen.Reminders.route) { RemindersScreen() }
+            composable("home") {
+                HomeScreen(
+                    viewModel = viewModel,
+                    onNavigateToNutrition = {
+                        navController.navigate("nutrition") {
+                            launchSingleTop = true
+                        }
+                    },
+                    onNavigateToGym = {
+                        navController.navigate("gym") {
+                            launchSingleTop = true
+                        }
+                    },
+                    onNavigateToChat = {
+                        navController.navigate("chat") {
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+            composable(Screen.Reminders.route) { RemindersScreen(viewModel = viewModel)}
             composable(Screen.Gym.route) { GymScreen() }
             composable(Screen.Nutrition.route) { NutritionScreen() }
+            composable(Screen.DonutShops.route) {
+                DonutShopsScreen(onBack = { navController.popBackStack() })
+            }
             composable(Screen.Profile.route) { ScreenLayout("Profile") }
-            composable(Screen.Settings.route) { ScreenLayout("Settings") }
+            composable(Screen.Settings.route) {
+                SettingsScreen(
+                    userName = name,
+                    onBack = { navController.popBackStack() }
+                )
+            }
             composable(Screen.Chat.route) { ChatScreen() }
             //composable(Screen.Camera.route) { CameraScreen() }
         }
@@ -172,11 +208,22 @@ fun MainScreen() {
 fun TopAppBarWithMenu(navController: NavHostController, currentRoute: String?) {
     TopAppBar(
         title = {
-            Text(
-                "SnapFit",
-                color = NeonPink,
-                style = MaterialTheme.typography.titleLarge
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "FuelForm",
+                    modifier = Modifier.height(32.dp),
+                    contentScale = ContentScale.Fit
+                )
+                Text(
+                    "FuelForm",
+                    color = NeonPink,
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = DarkBlue
@@ -225,22 +272,30 @@ fun BottomNavigationBar(navController: NavHostController) {
                     indicatorColor = Purple.copy(alpha = 0.3f)
                 ),
                 onClick = {
-                    navController.navigate(screen.route) {
-                        // Pop up to the start destination of the graph to avoid building up a large back stack
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+                    if (screen.route == Screen.Home.route) {
+                        // Special handling for Home - clear back stack completely
+                        navController.navigate(screen.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                inclusive = false
+                            }
+                            launchSingleTop = true
+                            // Don't restore state for home
                         }
-                        // Avoid multiple copies of the same destination
-                        launchSingleTop = true
-                        // Restore state when reselecting a previously selected item
-                        restoreState = true
+                    } else {
+                        // Normal navigation for other tabs
+                        navController.navigate(screen.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 }
             )
         }
     }
 }
-
 
 
 /* -------------------- Preview -------------------- */

@@ -178,7 +178,7 @@ fun WorkoutCard(
             .fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1E1E1E)
+            containerColor = Color(0xFF1A2A45)
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp
@@ -295,7 +295,7 @@ fun ExerciseItem(
                     color = if (exercise.completed)
                         Color(0xFF4CAF50).copy(alpha = 0.1f)
                     else
-                        Color(0xFF2A2A2A),
+                        Color(0xFF1E3050),
                     shape = RoundedCornerShape(12.dp)
                 )
                 .clickable { onToggle() }
