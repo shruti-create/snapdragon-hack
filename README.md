@@ -21,9 +21,10 @@ A connected laptop acts as the primary compute hub and runs three dedicated AI/M
 - A **Fitness Agent** that adapts workout intensity, duration, exercise category, and rest days
 - A **Chat Q/A Agent** that answers any questions the user may have about their health and fitness goals. 
 
-Together, these models continuously adjust recommendations based on user activity, recovery, and adherence, minimizing manual planning while promoting sustainable long-term progress.
+Together, these models continuously adjust recommendations based on user activity, recovery, and adherence, minimizing manual planning while promoting sustainable long-term progress. 
+Note on Testing and Documentation: We have dedicated unit tests for our frontend and thorough documentation throughout the repository. 
 
-**Note on Testing and Documentation:** We have dedicated unit tests for our frontend and thorough documentation throughout the repository. 
+
 ---
 
 ## Team Members
