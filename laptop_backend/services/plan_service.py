@@ -105,3 +105,95 @@ def delete_plan(user_id):
     except Exception as e:
         logger.error(f"DB_WRITE: Failed to delete plan - userId={user_id}, error={str(e)}", exc_info=True)
         return {"error": str(e)}, 500
+
+
+def update_week_workouts(user_id, week_name, new_exercises):
+    """
+    Update exercises for a specific week without replacing entire plan.
+
+    Args:
+        user_id: User ID
+        week_name: Week to update (e.g., "Week 1")
+        new_exercises: List of exercise objects
+
+    Returns:
+        (response_dict, status_code)
+    """
+    logger.info(f"DB_WRITE: Updating workouts for userId={user_id}, week={week_name}")
+    try:
+        doc_ref = db.collection("users").document(user_id)
+        doc = doc_ref.get()
+        if not doc.exists:
+            logger.warning(f"DB_WRITE: User not found - userId={user_id}")
+            return {"error": "User not found"}, 404
+
+        doc_data = doc.to_dict()
+        workouts = doc_data.get("workouts", [])
+
+        # Find and update the week
+        week_found = False
+        for week in workouts:
+            if week.get("weekName") == week_name:
+                week["exercises"] = new_exercises
+                week_found = True
+                logger.debug(f"DB_WRITE: Found week {week_name}, updating {len(new_exercises)} exercises")
+                break
+
+        if not week_found:
+            logger.warning(f"DB_WRITE: Week {week_name} not found in workouts for userId={user_id}")
+            return {"error": f"Week {week_name} not found"}, 404
+
+        # Save updated workouts
+        doc_ref.set({"workouts": workouts}, merge=True)
+        logger.info(f"DB_WRITE: Workouts updated successfully for userId={user_id}, week={week_name}")
+        return {"message": f"Workouts for {week_name} updated successfully"}, 200
+
+    except Exception as e:
+        logger.error(f"DB_WRITE: Failed to update workouts - userId={user_id}, error={str(e)}", exc_info=True)
+        return {"error": str(e)}, 500
+
+
+def update_week_meals(user_id, week_name, new_meals):
+    """
+    Update meals for a specific week without replacing entire plan.
+
+    Args:
+        user_id: User ID
+        week_name: Week to update (e.g., "Week 1")
+        new_meals: Dict of meal objects (breakfast, lunch, dinner, snack)
+
+    Returns:
+        (response_dict, status_code)
+    """
+    logger.info(f"DB_WRITE: Updating meals for userId={user_id}, week={week_name}")
+    try:
+        doc_ref = db.collection("users").document(user_id)
+        doc = doc_ref.get()
+        if not doc.exists:
+            logger.warning(f"DB_WRITE: User not found - userId={user_id}")
+            return {"error": "User not found"}, 404
+
+        doc_data = doc.to_dict()
+        diet = doc_data.get("diet", [])
+
+        # Find and update the week
+        week_found = False
+        for week in diet:
+            if week.get("weekName") == week_name:
+                week["meals"] = new_meals
+                week_found = True
+                logger.debug(f"DB_WRITE: Found week {week_name}, updating meals")
+                break
+
+        if not week_found:
+            logger.warning(f"DB_WRITE: Week {week_name} not found in diet for userId={user_id}")
+            return {"error": f"Week {week_name} not found"}, 404
+
+        # Save updated diet
+        doc_ref.set({"diet": diet}, merge=True)
+        logger.info(f"DB_WRITE: Meals updated successfully for userId={user_id}, week={week_name}")
+        return {"message": f"Meals for {week_name} updated successfully"}, 200
+
+    except Exception as e:
+        logger.error(f"DB_WRITE: Failed to update meals - userId={user_id}, error={str(e)}", exc_info=True)
+        return {"error": str(e)}, 500

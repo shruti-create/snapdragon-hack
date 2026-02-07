@@ -170,3 +170,141 @@ IMPORTANT:
 Updated plan:"""
 
     return prompt
+
+
+def adjust_workout_week_prompt(
+    user_data: Dict[str, Any],
+    current_week: Dict[str, Any],
+    skipped_workouts: list,
+    remaining_exercises: list,
+    reason: str = ""
+) -> str:
+    """
+    Generate prompt to adjust workout plan when exercises are skipped.
+
+    Context includes:
+    - User health profile
+    - Current week's original plan
+    - Which workouts were skipped and why
+    - Remaining exercises in the week
+
+    Args:
+        user_data: User health profile
+        current_week: Current week's workout plan
+        skipped_workouts: List of workout IDs that were skipped
+        remaining_exercises: List of exercises still to be done
+        reason: Optional reason for skipping
+
+    Returns:
+        Formatted prompt string
+    """
+    profile = user_data.get('profile', {})
+
+    prompt = f"""You are a fitness coach. A user has skipped some workouts in their plan. Adjust their remaining exercises for the current week to ensure they still meet their fitness goals.
+
+USER PROFILE:
+- Age: {profile.get('age', 'N/A')}
+- Weight: {profile.get('weight', 'N/A')} kg
+- Fitness Goal: {profile.get('fitness_goal', 'general health')}
+- Activity Level: {profile.get('activity_level', 'moderate')}
+
+CURRENT WEEK: {current_week.get('weekName', 'Week 1')}
+
+SKIPPED WORKOUTS:
+- IDs: {', '.join(skipped_workouts)}
+- Reason: {reason or 'Not specified'}
+
+REMAINING EXERCISES TO COMPLETE:
+{remaining_exercises}
+
+TASK: Regenerate the remaining exercises for this week in JSON format:
+{{
+  "exercises": [
+    {{"workoutId": "w1", "name": "...", "sets": 3, "reps": 12, "duration": "N/A", "completed": false}},
+    {{"workoutId": "w2", "name": "...", "sets": 1, "reps": null, "duration": "30min", "completed": false}}
+  ]
+}}
+
+IMPORTANT:
+- Keep remaining exercises but redistribute them to cover skipped workout objectives
+- Adjust intensity/volume if the reason suggests limitations (e.g., "pain", "injury")
+- Ensure workout balance (cardio, strength, flexibility)
+- Return ONLY valid JSON with exercises array
+
+Adjusted exercises:"""
+
+    return prompt
+
+
+def adjust_nutrition_week_prompt(
+    user_data: Dict[str, Any],
+    current_week: Dict[str, Any],
+    extra_calories: int,
+    day_of_week: int,
+    remaining_days: list,
+    notes: str = ""
+) -> str:
+    """
+    Generate prompt to adjust nutrition plan when extra calories consumed.
+
+    Context includes:
+    - User nutrition profile
+    - Current week's original meal plan
+    - Extra calories consumed
+    - Which day the surplus occurred
+    - Remaining days in the week
+
+    Args:
+        user_data: User nutrition profile
+        current_week: Current week's meal plan
+        extra_calories: Additional calories consumed
+        day_of_week: Which day (0-6) they ate extra
+        remaining_days: List of remaining meal plans
+        notes: Optional notes about the extra calories
+
+    Returns:
+        Formatted prompt string
+    """
+    nutrition = user_data.get('nutrition', {})
+    daily_target = nutrition.get('calorie_goal', 2000)
+
+    prompt = f"""You are a nutrition expert. A user has consumed extra calories in their meal plan. Adjust their remaining meals for the current week to maintain their weekly nutrition goals.
+
+NUTRITION PROFILE:
+- Daily Calorie Goal: {daily_target} kcal
+- Diet Type: {nutrition.get('diet_type', 'standard')}
+- Allergies: {', '.join(nutrition.get('allergies', [])) or 'None'}
+- Dietary Restrictions: {', '.join(nutrition.get('dietary_restrictions', [])) or 'None'}
+
+CURRENT WEEK: {current_week.get('weekName', 'Week 1')}
+
+SURPLUS INFORMATION:
+- Extra Calories Consumed: {extra_calories} kcal on day {day_of_week}
+- Notes: {notes or 'Not specified'}
+- Weekly Budget Remaining: Needs redistribution
+
+REMAINING DAYS' MEALS:
+{remaining_days}
+
+TASK: Redistribute calories across remaining days to maintain weekly balance. Return JSON format:
+{{
+  "adjusted_meals": {{
+    "day_{day_of_week+1}": {{
+      "breakfast": {{"name": "...", "calories": 350, "protein": 20, "carbs": 50, "fats": 15, "completed": false}},
+      "lunch": {{"name": "...", "calories": 400, "protein": 25, "carbs": 55, "fats": 18, "completed": false}},
+      "dinner": {{"name": "...", "calories": 400, "protein": 25, "carbs": 55, "fats": 18, "completed": false}},
+      "snack": {{"name": "...", "calories": 150, "protein": 8, "carbs": 20, "fats": 6, "completed": false}}
+    }}
+  }}
+}}
+
+IMPORTANT:
+- Reduce calories across remaining days to offset the {extra_calories} kcal surplus
+- Maintain macro balance (protein, carbs, fats ratios)
+- Respect dietary restrictions and allergies
+- Make small reductions (not eliminating meals) to avoid hunger
+- Return ONLY valid JSON
+
+Adjusted meal plan:"""
+
+    return prompt
