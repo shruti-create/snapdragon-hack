@@ -5,10 +5,44 @@ import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
 import com.google.gson.Gson
+import org.json.JSONObject
 
 object ApiService {
     private const val BASE_URL = "http://192.168.1.232:5000"
     private val gson = Gson()
+
+    // Register new user
+    suspend fun registerUser(email: String, password: String, username: String): RegisterResponse? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val url = URL("$BASE_URL/users/register")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "POST"
+                connection.setRequestProperty("Content-Type", "application/json")
+                connection.doOutput = true
+
+                val requestBody = JSONObject().apply {
+                    put("email", email)
+                    put("password", password)
+                    put("username", username)
+                }.toString()
+
+                connection.outputStream.write(requestBody.toByteArray())
+
+                if (connection.responseCode == 200 || connection.responseCode == 201) {
+                    val response = connection.inputStream.bufferedReader().readText()
+                    gson.fromJson(response, RegisterResponse::class.java)
+                } else {
+                    val errorResponse = connection.errorStream?.bufferedReader()?.readText()
+                    println("Registration failed: $errorResponse")
+                    null
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
+    }
 
     // Get user's nutrition plan
     suspend fun getNutritionPlan(userId: String): NutritionPlanResponse? {
@@ -90,6 +124,13 @@ object ApiService {
 }
 
 // API Response Models
+data class RegisterResponse(
+    val user_id: String,
+    val email: String,
+    val username: String,
+    val message: String
+)
+
 data class NutritionPlanResponse(
     val plan: Plan
 )
