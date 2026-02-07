@@ -52,12 +52,14 @@ sealed class Screen(val route: String, val label: String, val icon: androidx.com
     object Reminders : Screen("reminders", "Reminders", Icons.Default.Alarm)
     object Settings : Screen("settings", "Settings", Icons.Default.Settings)
     object Gym : Screen("gym", "Gym", Icons.Default.SportsGymnastics)
+    object Chat : Screen("chat", "Chat", Icons.Default.Mms)
 
 }
 
 
 val bottomNavItems = listOf(
     Screen.Home,
+    Screen.Chat,
     Screen.Nutrition,
     Screen.Gym,
     Screen.Reminders
@@ -158,7 +160,7 @@ fun MainScreen() {
             composable(Screen.Nutrition.route) { NutritionScreen() }
             composable(Screen.Profile.route) { ScreenLayout("Profile") }
             composable(Screen.Settings.route) { ScreenLayout("Settings") }
-            //composable(Screen.Messages.route) { MessagesScreen() }
+            composable(Screen.Chat.route) { ChatScreen() }
             //composable(Screen.Camera.route) { CameraScreen() }
         }
     }
