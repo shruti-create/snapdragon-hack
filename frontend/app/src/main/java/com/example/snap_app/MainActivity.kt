@@ -91,7 +91,7 @@ fun MainScreen() {
                 Screen.SignUp.route,
                 Screen.Welcome.route
             )) {
-                TopAppBarWithMenu(navController = navController)
+                TopAppBarWithMenu(navController = navController, currentRoute = currentRoute)
             }
         },
         bottomBar = {
@@ -157,7 +157,14 @@ fun MainScreen() {
             composable(Screen.Gym.route) { GymScreen() }
             composable(Screen.Nutrition.route) { NutritionScreen() }
             composable(Screen.Profile.route) { ScreenLayout("Profile") }
-            composable(Screen.Settings.route) { ScreenLayout("Settings") }
+            composable(Screen.Settings.route) {
+                SettingsScreen(
+                    userName = name,
+                    onBack = { 
+                        navController.popBackStack()
+                    }
+                )
+            }
             //composable(Screen.Messages.route) { MessagesScreen() }
             //composable(Screen.Camera.route) { CameraScreen() }
         }
@@ -167,9 +174,7 @@ fun MainScreen() {
 /* -------------------- Top App Bar with Menu -------------------- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopAppBarWithMenu(navController: NavHostController) {
-    var menuExpanded by remember { mutableStateOf(false) }
-
+fun TopAppBarWithMenu(navController: NavHostController, currentRoute: String?) {
     TopAppBar(
         title = {
             Text(
@@ -182,48 +187,21 @@ fun TopAppBarWithMenu(navController: NavHostController) {
             containerColor = DarkBlue
         ),
         actions = {
-            Box {
-                IconButton(
-                    onClick = { menuExpanded = !menuExpanded }
-                ) {
-                    Icon(
-                        Icons.Default.Settings,
-                        contentDescription = "Menu",
-                        tint = NeonPink,
-                        modifier = Modifier.size(28.dp)
-                    )
+            IconButton(
+                onClick = {
+                    if (currentRoute == Screen.Settings.route) {
+                        navController.popBackStack()
+                    } else {
+                        navController.navigate(Screen.Settings.route)
+                    }
                 }
-                DropdownMenu(
-                    expanded = menuExpanded,
-                    onDismissRequest = { menuExpanded = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Profile", color = Color.White) },
-                        onClick = {
-                            navController.navigate(Screen.Profile.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                            menuExpanded = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Settings", color = Color.White) },
-                        onClick = {
-                            navController.navigate(Screen.Settings.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                            menuExpanded = false
-                        }
-                    )
-                }
+            ) {
+                Icon(
+                    Icons.Default.Settings,
+                    contentDescription = "Settings",
+                    tint = NeonPink,
+                    modifier = Modifier.size(28.dp)
+                )
             }
         }
     )
