@@ -110,14 +110,10 @@ class GenieService(private val context: Context) {
      * Format user message in Llama 3.2 chat template
      */
     private fun formatLlama3Prompt(userMessage: String): String {
-        val systemPrompt = """You are a helpful fitness and nutrition assistant. 
-Provide clear, actionable advice about exercise, diet, and healthy living.
-Keep responses concise and friendly."""
-        
         return buildString {
             append("<|begin_of_text|>")
             append("<|start_header_id|>system<|end_header_id|>\n\n")
-            append(systemPrompt)
+            append("Concise fitness and nutrition assistant. Be brief.")
             append("<|eot_id|>")
             append("<|start_header_id|>user<|end_header_id|>\n\n")
             append(userMessage)
@@ -150,13 +146,20 @@ Keep responses concise and friendly."""
             //   (for libcdsprpc.so needed by HTP stub to communicate with DSP)
             // - Hexagon skel files stay in /data/local/tmp/qairt/... (DSP loads them)
             // - Model files at /data/local/tmp/snap_models/
+            // - --save/--restore reuses cached model state for faster subsequent calls
+            val stateDir = File(cacheDir, "genie_state")
+            stateDir.mkdirs()
+            val restoreFlag = if (File(stateDir, "dialog0").exists()) {
+                "--restore ${stateDir.absolutePath} "
+            } else ""
             val shellCmd = buildString {
                 append("cd $modelPath && ")
                 append("export LD_LIBRARY_PATH=$libDir:/vendor/lib64 && ")
                 append("export ADSP_LIBRARY_PATH=$HEXAGON_SKEL_DIR && ")
                 append("$libDir/libgenie_t2t_run.so ")
                 append("-c $CONFIG_FILE ")
-                append("--log verbose ")
+                append(restoreFlag)
+                append("--save ${stateDir.absolutePath} ")
                 append("--prompt_file ${promptFile.absolutePath}")
             }
 

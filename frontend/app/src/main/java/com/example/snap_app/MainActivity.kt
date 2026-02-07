@@ -24,11 +24,15 @@ import androidx.navigation.compose.rememberNavController
 import com.example.snap_app.ui.theme.Snap_appTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 
-// Custom color scheme
-val DarkBlue = Color(0xFF0A1929)
-val NeonPink = Color(0xFFFF10F0)
-val Purple = Color(0xFF9C27B0)
+// FuelForm color scheme
+val DarkBlue = Color(0xFF111F35)
+val NeonPink = Color(0xFFF63049)
+val Purple = Color(0xFFD02752)
+val Burgundy = Color(0xFF8A244B)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,8 +69,7 @@ val bottomNavItems = listOf(
     Screen.Chat,
     Screen.Nutrition,
     Screen.Gym,
-    Screen.Reminders,
-    Screen.DonutShops
+    Screen.Reminders
 )
 
 /* -------------------- Main Scaffold with Top App Bar & Bottom Nav -------------------- */
@@ -205,11 +208,22 @@ fun MainScreen() {
 fun TopAppBarWithMenu(navController: NavHostController, currentRoute: String?) {
     TopAppBar(
         title = {
-            Text(
-                "SnapFit",
-                color = NeonPink,
-                style = MaterialTheme.typography.titleLarge
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "FuelForm",
+                    modifier = Modifier.height(32.dp),
+                    contentScale = ContentScale.Fit
+                )
+                Text(
+                    "FuelForm",
+                    color = NeonPink,
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = DarkBlue

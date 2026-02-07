@@ -29,7 +29,6 @@ fun SettingsScreen(
     userName: String = "User",
     onBack: () -> Unit
 ) {
-    var isDarkMode by remember { mutableStateOf(true) }
     var notificationsEnabled by remember { mutableStateOf(true) }
     var mealRemindersEnabled by remember { mutableStateOf(true) }
     var workoutRemindersEnabled by remember { mutableStateOf(true) }
@@ -87,7 +86,7 @@ fun SettingsScreen(
                     .fillMaxWidth()
                     .padding(12.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A2E)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A2A45)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Row(
@@ -123,7 +122,7 @@ fun SettingsScreen(
                         )
 
                         Text(
-                            text = "SnapFit User",
+                            text = "FuelForm User",
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.White.copy(alpha = 0.6f)
                         )
@@ -134,14 +133,6 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Settings Items
-            CompactSettingItem(
-                icon = if (isDarkMode) Icons.Default.Brightness4 else Icons.Default.Brightness7,
-                title = "Dark Mode",
-                isToggle = true,
-                isEnabled = isDarkMode,
-                onToggle = { isDarkMode = it }
-            )
-
             CompactSettingItem(
                 icon = if (notificationsEnabled) Icons.Default.Notifications else Icons.Default.NotificationsOff,
                 title = "Push Notifications",

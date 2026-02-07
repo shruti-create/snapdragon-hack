@@ -18,7 +18,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
@@ -209,8 +215,8 @@ fun ChatScreen() {
                         )
                     },
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFF2A2A2A),
-                        unfocusedContainerColor = Color(0xFF2A2A2A),
+                        focusedContainerColor = Color(0xFF1E3050),
+                        unfocusedContainerColor = Color(0xFF1E3050),
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
                         cursorColor = NeonPink,
@@ -286,7 +292,7 @@ fun ChatScreen() {
 @Composable
 fun MessageBubble(message: ChatMessage) {
     val alignment = if (message.isUser) Alignment.End else Alignment.Start
-    val backgroundColor = if (message.isUser) NeonPink else Color(0xFF2A2A2A)
+    val backgroundColor = if (message.isUser) NeonPink else Color(0xFF1E3050)
     val textColor = Color.White
 
     val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -311,12 +317,20 @@ fun MessageBubble(message: ChatMessage) {
                 .padding(12.dp)
         ) {
             Column {
-                Text(
-                    text = message.content,
-                    color = textColor,
-                    fontSize = 15.sp,
-                    lineHeight = 20.sp
-                )
+                if (message.isUser) {
+                    Text(
+                        text = message.content,
+                        color = textColor,
+                        fontSize = 15.sp,
+                        lineHeight = 20.sp
+                    )
+                } else {
+                    MarkdownText(
+                        markdown = message.content,
+                        color = textColor,
+                        fontSize = 15.sp
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -339,7 +353,7 @@ fun TemplateChip(
     Box(
         modifier = Modifier
             .background(
-                color = Color(0xFF2A2A2A),
+                color = Color(0xFF1E3050),
                 shape = RoundedCornerShape(20.dp)
             )
             .clickable { onClick() }
@@ -360,7 +374,7 @@ fun TypingIndicator() {
         modifier = Modifier
             .widthIn(max = 80.dp)
             .background(
-                color = Color(0xFF2A2A2A),
+                color = Color(0xFF1E3050),
                 shape = RoundedCornerShape(
                     topStart = 16.dp,
                     topEnd = 16.dp,
@@ -392,4 +406,155 @@ fun TypingIndicator() {
 @Composable
 private fun animateFloatAsState(targetValue: Float, label: String): State<Float> {
     return remember { mutableStateOf(targetValue) }
+}
+
+@Composable
+fun MarkdownText(
+    markdown: String,
+    color: Color,
+    fontSize: androidx.compose.ui.unit.TextUnit = 15.sp
+) {
+    val lines = markdown.lines()
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        for (line in lines) {
+            when {
+                // Headers
+                line.startsWith("### ") -> {
+                    Text(
+                        text = parseInlineMarkdown(line.removePrefix("### ").trim(), color),
+                        fontSize = fontSize * 1.1f,
+                        fontWeight = FontWeight.Bold,
+                        lineHeight = 24.sp,
+                        color = color
+                    )
+                }
+                line.startsWith("## ") -> {
+                    Text(
+                        text = parseInlineMarkdown(line.removePrefix("## ").trim(), color),
+                        fontSize = fontSize * 1.2f,
+                        fontWeight = FontWeight.Bold,
+                        lineHeight = 26.sp,
+                        color = color
+                    )
+                }
+                line.startsWith("# ") -> {
+                    Text(
+                        text = parseInlineMarkdown(line.removePrefix("# ").trim(), color),
+                        fontSize = fontSize * 1.35f,
+                        fontWeight = FontWeight.Bold,
+                        lineHeight = 28.sp,
+                        color = color
+                    )
+                }
+                // Bullet list items
+                line.trimStart().startsWith("- ") || line.trimStart().startsWith("* ") -> {
+                    val indent = line.length - line.trimStart().length
+                    val content = line.trimStart().drop(2)
+                    Row(modifier = Modifier.padding(start = (indent * 4).dp)) {
+                        Text("•  ", color = NeonPink, fontSize = fontSize, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = parseInlineMarkdown(content, color),
+                            fontSize = fontSize,
+                            lineHeight = 20.sp,
+                            color = color
+                        )
+                    }
+                }
+                // Numbered list items
+                line.trimStart().matches(Regex("^\\d+\\.\\s.*")) -> {
+                    val indent = line.length - line.trimStart().length
+                    val numberEnd = line.trimStart().indexOf(". ")
+                    val number = line.trimStart().substring(0, numberEnd + 1)
+                    val content = line.trimStart().substring(numberEnd + 2)
+                    Row(modifier = Modifier.padding(start = (indent * 4).dp)) {
+                        Text("$number ", color = NeonPink, fontSize = fontSize, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = parseInlineMarkdown(content, color),
+                            fontSize = fontSize,
+                            lineHeight = 20.sp,
+                            color = color
+                        )
+                    }
+                }
+                // Code block lines (```...```)
+                line.trimStart().startsWith("```") -> {
+                    // skip fence markers
+                }
+                // Empty line -> small spacer
+                line.isBlank() -> {
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+                // Regular paragraph
+                else -> {
+                    Text(
+                        text = parseInlineMarkdown(line, color),
+                        fontSize = fontSize,
+                        lineHeight = 20.sp,
+                        color = color
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Parses inline markdown: **bold**, *italic*, `code`
+ */
+fun parseInlineMarkdown(text: String, color: Color): AnnotatedString {
+    return buildAnnotatedString {
+        var i = 0
+        val len = text.length
+        while (i < len) {
+            when {
+                // Bold: **text**
+                i + 1 < len && text[i] == '*' && text[i + 1] == '*' -> {
+                    val end = text.indexOf("**", i + 2)
+                    if (end != -1) {
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = color)) {
+                            append(text.substring(i + 2, end))
+                        }
+                        i = end + 2
+                    } else {
+                        append(text[i])
+                        i++
+                    }
+                }
+                // Italic: *text*
+                text[i] == '*' -> {
+                    val end = text.indexOf('*', i + 1)
+                    if (end != -1) {
+                        withStyle(SpanStyle(fontStyle = FontStyle.Italic, color = color)) {
+                            append(text.substring(i + 1, end))
+                        }
+                        i = end + 1
+                    } else {
+                        append(text[i])
+                        i++
+                    }
+                }
+                // Inline code: `text`
+                text[i] == '`' -> {
+                    val end = text.indexOf('`', i + 1)
+                    if (end != -1) {
+                        withStyle(SpanStyle(
+                            fontFamily = FontFamily.Monospace,
+                            background = Color.White.copy(alpha = 0.1f),
+                            color = NeonPink
+                        )) {
+                            append(text.substring(i + 1, end))
+                        }
+                        i = end + 1
+                    } else {
+                        append(text[i])
+                        i++
+                    }
+                }
+                else -> {
+                    append(text[i])
+                    i++
+                }
+            }
+        }
+    }
 }

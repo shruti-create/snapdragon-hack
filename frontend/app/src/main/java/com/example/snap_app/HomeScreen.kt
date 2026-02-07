@@ -67,7 +67,7 @@ fun HomeScreen(
                 Brush.verticalGradient(
                     colors = listOf(
                         DarkBlue,
-                        Color(0xFF0D1B2A)
+                        Color(0xFF0D1828)
                     )
                 )
             )
@@ -109,7 +109,7 @@ fun HomeScreen(
                     ),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF1A1A2E)
+                    containerColor = Color(0xFF1A2A45)
                 )
             ) {
                 Column(
@@ -206,8 +206,8 @@ fun HomeScreen(
                     subtitle = "Log meals & track calories",
                     icon = Icons.Default.Restaurant,
                     gradientColors = listOf(
-                        Color(0xFF1A1A2E),
-                        Color(0xFF252538)
+                        Color(0xFF1A2A45),
+                        Color(0xFF1E3050)
                     ),
                     onClick = onNavigateToNutrition
                 )
@@ -217,8 +217,8 @@ fun HomeScreen(
                     subtitle = "Track workouts & progress",
                     icon = Icons.Default.FitnessCenter,
                     gradientColors = listOf(
-                        Color(0xFF1A1A2E),
-                        Color(0xFF252538)
+                        Color(0xFF1A2A45),
+                        Color(0xFF1E3050)
                     ),
                     onClick = onNavigateToGym
                 )
@@ -228,8 +228,8 @@ fun HomeScreen(
                     subtitle = "Get personalized advice",
                     icon = Icons.Default.Chat,
                     gradientColors = listOf(
-                        Color(0xFF1A1A2E),
-                        Color(0xFF252538)
+                        Color(0xFF1A2A45),
+                        Color(0xFF1E3050)
                     ),
                     onClick = onNavigateToChat
                 )
@@ -254,7 +254,7 @@ fun ProfessionalNavigationCard(
             .shadow(
                 elevation = 4.dp,
                 shape = RoundedCornerShape(16.dp),
-                spotColor = Color(0xFF1A1A2E).copy(alpha = 0.5f)
+                spotColor = Color(0xFF1A2A45).copy(alpha = 0.5f)
             ),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(

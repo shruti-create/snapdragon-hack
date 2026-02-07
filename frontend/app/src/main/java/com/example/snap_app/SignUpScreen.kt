@@ -128,7 +128,7 @@ fun SignUpScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(32.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A2E)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1A2A45)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
                 Box(
@@ -207,8 +207,8 @@ fun SignUpScreen(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
                             cursorColor = NeonPink,
-                            focusedContainerColor = Color(0xFF0F0F1E),
-                            unfocusedContainerColor = Color(0xFF0F0F1E)
+                            focusedContainerColor = Color(0xFF0D1828),
+                            unfocusedContainerColor = Color(0xFF0D1828)
                         ),
                         shape = RoundedCornerShape(16.dp),
                         enabled = !isLoading
@@ -238,8 +238,8 @@ fun SignUpScreen(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
                             cursorColor = NeonPink,
-                            focusedContainerColor = Color(0xFF0F0F1E),
-                            unfocusedContainerColor = Color(0xFF0F0F1E)
+                            focusedContainerColor = Color(0xFF0D1828),
+                            unfocusedContainerColor = Color(0xFF0D1828)
                         ),
                         shape = RoundedCornerShape(16.dp),
                         enabled = !isLoading
@@ -279,8 +279,8 @@ fun SignUpScreen(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
                             cursorColor = NeonPink,
-                            focusedContainerColor = Color(0xFF0F0F1E),
-                            unfocusedContainerColor = Color(0xFF0F0F1E)
+                            focusedContainerColor = Color(0xFF0D1828),
+                            unfocusedContainerColor = Color(0xFF0D1828)
                         ),
                         shape = RoundedCornerShape(16.dp),
                         enabled = !isLoading
@@ -320,8 +320,8 @@ fun SignUpScreen(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
                             cursorColor = NeonPink,
-                            focusedContainerColor = Color(0xFF0F0F1E),
-                            unfocusedContainerColor = Color(0xFF0F0F1E)
+                            focusedContainerColor = Color(0xFF0D1828),
+                            unfocusedContainerColor = Color(0xFF0D1828)
                         ),
                         shape = RoundedCornerShape(16.dp),
                         enabled = !isLoading

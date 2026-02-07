@@ -1,6 +1,7 @@
 package com.example.snap_app
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -8,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,7 +33,7 @@ fun AuthScreen(
                 .fillMaxWidth()
                 .padding(16.dp),
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A2E))
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1A2A45))
         ) {
             Column(
                 modifier = Modifier
@@ -39,13 +42,20 @@ fun AuthScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                // App Title
+                // App Logo
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "FuelForm",
+                    modifier = Modifier.height(80.dp),
+                    contentScale = ContentScale.Fit
+                )
+
                 Text(
-                    text = "SnapFit",
+                    text = "FuelForm",
                     style = MaterialTheme.typography.headlineLarge,
                     color = NeonPink,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 42.sp
+                    fontSize = 36.sp
                 )
 
                 Text(
