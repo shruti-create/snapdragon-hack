@@ -46,17 +46,13 @@ data class WorkoutData(
 
 @Composable
 fun GymScreen(viewModel: AppViewModel? = null) {
-    val apiWorkouts by viewModel?.workoutPlan?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
+    val workouts by viewModel?.workoutPlan?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
     val planLoading by viewModel?.planLoading?.collectAsState() ?: remember { mutableStateOf(false) }
     val planError by viewModel?.planError?.collectAsState() ?: remember { mutableStateOf<String?>(null) }
 
-    var workouts by remember(apiWorkouts) {
-        mutableStateOf(apiWorkouts)
-    }
-
     // Try fetching plan if we have a viewModel and no data yet
     LaunchedEffect(Unit) {
-        if (viewModel != null && apiWorkouts.isEmpty()) {
+        if (viewModel != null && workouts.isEmpty()) {
             viewModel.fetchPlan()
         }
     }
@@ -163,46 +159,10 @@ fun GymScreen(viewModel: AppViewModel? = null) {
                     WorkoutCard(
                         workout = workout,
                         onExerciseToggle = { exerciseIndex ->
-                            // Create new list with updated exercise
-                            val updatedExercises = workout.exercises.toMutableList()
-                            updatedExercises[exerciseIndex] = updatedExercises[exerciseIndex].copy(
-                                completed = !updatedExercises[exerciseIndex].completed
-                            )
-
-                            // Check if all exercises are completed
-                            val allCompleted = updatedExercises.all { it.completed }
-
-                            // Create new workout with updated exercises and completion status
-                            val updatedWorkout = workout.copy(
-                                exercises = updatedExercises,
-                                completed = allCompleted
-                            )
-
-                            // Update the workouts list
-                            workouts = workouts.toMutableList().apply {
-                                this[index] = updatedWorkout
-                            }
+                            viewModel?.toggleExerciseCompletion(index, exerciseIndex)
                         },
                         onWorkoutToggle = {
-                            // Toggle entire workout
-                            val newCompletedStatus = !workout.completed
-                            val updatedExercises = workout.exercises.map {
-                                it.copy(completed = newCompletedStatus)
-                            }
-
-                            val updatedWorkout = workout.copy(
-                                exercises = updatedExercises,
-                                completed = newCompletedStatus
-                            )
-
-                            // Log to API when marking as complete
-                            if (newCompletedStatus) {
-                                viewModel?.logWorkoutCompletion(updatedExercises)
-                            }
-
-                            workouts = workouts.toMutableList().apply {
-                                this[index] = updatedWorkout
-                            }
+                            viewModel?.toggleWorkoutCompletion(index)
                         }
                     )
                 }

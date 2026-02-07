@@ -33,6 +33,94 @@ class AppViewModel : ViewModel() {
     private val _planError = MutableStateFlow<String?>(null)
     val planError: StateFlow<String?> = _planError
 
+    // Reminders state - persisted across navigation
+    private val _reminders = MutableStateFlow<List<MealReminder>>(emptyList())
+    val reminders: StateFlow<List<MealReminder>> = _reminders
+
+    private var lastResetDate: String = ""
+
+    fun initReminders() {
+        val currentDate = getCurrentDate()
+        if (lastResetDate != currentDate) {
+            _reminders.value = generateRemindersFromPlan(_nutritionPlan.value, _workoutPlan.value)
+            lastResetDate = currentDate
+        } else if (_reminders.value.isEmpty()) {
+            _reminders.value = generateRemindersFromPlan(_nutritionPlan.value, _workoutPlan.value)
+        }
+    }
+
+    fun toggleReminderCompletion(id: Int) {
+        _reminders.value = _reminders.value.map {
+            if (it.id == id) it.copy(isCompleted = true) else it
+        }
+        recalcCompletionPercentage()
+    }
+
+    fun uncompleteReminder(id: Int) {
+        _reminders.value = _reminders.value.map {
+            if (it.id == id) it.copy(isCompleted = false) else it
+        }
+        recalcCompletionPercentage()
+    }
+
+    private fun recalcCompletionPercentage() {
+        val all = _reminders.value
+        _completionPercentage.value = if (all.isNotEmpty()) {
+            (all.count { it.isCompleted }.toFloat() / all.size.toFloat() * 100).toInt()
+        } else 0
+    }
+
+    // Nutrition plan meal completion toggle
+    fun toggleMealCompletion(weekIndex: Int, mealType: String) {
+        val weeks = _nutritionPlan.value.toMutableList()
+        if (weekIndex !in weeks.indices) return
+        val week = weeks[weekIndex]
+        val updatedWeek = when (mealType) {
+            "breakfast" -> {
+                if (!week.breakfast.completed) logMealCompletion("breakfast", week.breakfast)
+                week.copy(breakfast = week.breakfast.copy(completed = !week.breakfast.completed))
+            }
+            "lunch" -> {
+                if (!week.lunch.completed) logMealCompletion("lunch", week.lunch)
+                week.copy(lunch = week.lunch.copy(completed = !week.lunch.completed))
+            }
+            "dinner" -> {
+                if (!week.dinner.completed) logMealCompletion("dinner", week.dinner)
+                week.copy(dinner = week.dinner.copy(completed = !week.dinner.completed))
+            }
+            else -> week
+        }
+        weeks[weekIndex] = updatedWeek
+        _nutritionPlan.value = weeks
+    }
+
+    // Workout exercise completion toggle
+    fun toggleExerciseCompletion(workoutIndex: Int, exerciseIndex: Int) {
+        val list = _workoutPlan.value.toMutableList()
+        if (workoutIndex !in list.indices) return
+        val workout = list[workoutIndex]
+        if (exerciseIndex !in workout.exercises.indices) return
+        val updatedExercises = workout.exercises.toMutableList()
+        updatedExercises[exerciseIndex] = updatedExercises[exerciseIndex].copy(
+            completed = !updatedExercises[exerciseIndex].completed
+        )
+        val allCompleted = updatedExercises.all { it.completed }
+        list[workoutIndex] = workout.copy(exercises = updatedExercises, completed = allCompleted)
+        _workoutPlan.value = list
+    }
+
+    // Toggle entire workout completion
+    fun toggleWorkoutCompletion(workoutIndex: Int) {
+        val list = _workoutPlan.value.toMutableList()
+        if (workoutIndex !in list.indices) return
+        val workout = list[workoutIndex]
+        val newStatus = !workout.completed
+        val updatedExercises = workout.exercises.map { it.copy(completed = newStatus) }
+        list[workoutIndex] = workout.copy(exercises = updatedExercises, completed = newStatus)
+        if (newStatus) logWorkoutCompletion(updatedExercises)
+        _workoutPlan.value = list
+    }
+
     fun setUser(userId: String, email: String, username: String) {
         _userId.value = userId
         _userEmail.value = email
@@ -58,14 +146,14 @@ class AppViewModel : ViewModel() {
             _planLoading.value = false
             _planError.value = null
             _completionPercentage.value = 0
+            _reminders.value = emptyList()
+            lastResetDate = ""
             onComplete()
         }
     }
 
     fun updateCompletionPercentage(percentage: Int) {
-        viewModelScope.launch {
-            _completionPercentage.value = percentage
-        }
+        _completionPercentage.value = percentage
     }
 
     fun createHealthProfile(

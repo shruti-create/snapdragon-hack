@@ -44,17 +44,13 @@ data class DietWeek(
 
 @Composable
 fun NutritionScreen(viewModel: AppViewModel? = null) {
-    val apiWeeks by viewModel?.nutritionPlan?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
+    val dietWeeks by viewModel?.nutritionPlan?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
     val planLoading by viewModel?.planLoading?.collectAsState() ?: remember { mutableStateOf(false) }
     val planError by viewModel?.planError?.collectAsState() ?: remember { mutableStateOf<String?>(null) }
 
-    var dietWeeks by remember(apiWeeks) {
-        mutableStateOf(apiWeeks)
-    }
-
     // Try fetching plan if we have a viewModel and no data yet
     LaunchedEffect(Unit) {
-        if (viewModel != null && apiWeeks.isEmpty()) {
+        if (viewModel != null && dietWeeks.isEmpty()) {
             viewModel.fetchPlan()
         }
     }
@@ -161,43 +157,7 @@ fun NutritionScreen(viewModel: AppViewModel? = null) {
                     DietWeekCard(
                         dietWeek = dietWeek,
                         onMealToggle = { mealType ->
-                            val updatedWeek = when (mealType) {
-                                "breakfast" -> {
-                                    if (!dietWeek.breakfast.completed) {
-                                        viewModel?.logMealCompletion("breakfast", dietWeek.breakfast)
-                                    }
-                                    dietWeek.copy(
-                                        breakfast = dietWeek.breakfast.copy(
-                                            completed = !dietWeek.breakfast.completed
-                                        )
-                                    )
-                                }
-                                "lunch" -> {
-                                    if (!dietWeek.lunch.completed) {
-                                        viewModel?.logMealCompletion("lunch", dietWeek.lunch)
-                                    }
-                                    dietWeek.copy(
-                                        lunch = dietWeek.lunch.copy(
-                                            completed = !dietWeek.lunch.completed
-                                        )
-                                    )
-                                }
-                                "dinner" -> {
-                                    if (!dietWeek.dinner.completed) {
-                                        viewModel?.logMealCompletion("dinner", dietWeek.dinner)
-                                    }
-                                    dietWeek.copy(
-                                        dinner = dietWeek.dinner.copy(
-                                            completed = !dietWeek.dinner.completed
-                                        )
-                                    )
-                                }
-                                else -> dietWeek
-                            }
-
-                            dietWeeks = dietWeeks.toMutableList().apply {
-                                this[weekIndex] = updatedWeek
-                            }
+                            viewModel?.toggleMealCompletion(weekIndex, mealType)
                         }
                     )
                 }

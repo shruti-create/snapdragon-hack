@@ -258,7 +258,7 @@ fun TopAppBarWithMenu(navController: NavHostController, currentRoute: String?) {
                 }
             ) {
                 Icon(
-                    imageVector = Icons.Default.PinDrop,
+                    imageVector = Icons.Default.DonutSmall,
                     contentDescription = "Donut Shops",
                     tint = NeonPink,
                     modifier = Modifier.size(26.dp)

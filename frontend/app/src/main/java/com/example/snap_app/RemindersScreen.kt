@@ -38,23 +38,16 @@ data class MealReminder(
 fun RemindersScreen(viewModel: AppViewModel) {
     val nutritionPlan by viewModel.nutritionPlan.collectAsState()
     val workoutPlan by viewModel.workoutPlan.collectAsState()
+    val reminders by viewModel.reminders.collectAsState()
 
-    var reminders by remember(nutritionPlan, workoutPlan) {
-        mutableStateOf(generateRemindersFromPlan(nutritionPlan, workoutPlan))
-    }
     var showDialog by remember { mutableStateOf(false) }
     var selectedReminder by remember { mutableStateOf<MealReminder?>(null) }
     var alternateFood by remember { mutableStateOf("") }
     var showCompletedSection by remember { mutableStateOf(false) }
-    var lastResetDate by remember { mutableStateOf(getCurrentDate()) }
 
-    // Check if it's a new day and reset if needed
-    LaunchedEffect(Unit) {
-        val currentDate = getCurrentDate()
-        if (currentDate != lastResetDate) {
-            reminders = generateRemindersFromPlan(nutritionPlan, workoutPlan)
-            lastResetDate = currentDate
-        }
+    // Initialize reminders from plan data (handles new-day reset too)
+    LaunchedEffect(nutritionPlan, workoutPlan) {
+        viewModel.initReminders()
     }
 
     val completedReminders = reminders.filter { it.isCompleted }
@@ -62,11 +55,6 @@ fun RemindersScreen(viewModel: AppViewModel) {
     val completionPercentage = if (reminders.isNotEmpty()) {
         (completedReminders.size.toFloat() / reminders.size.toFloat() * 100).toInt()
     } else 0
-
-    // Update ViewModel with completion percentage
-    LaunchedEffect(completionPercentage) {
-        viewModel.updateCompletionPercentage(completionPercentage)
-    }
 
     Box(
         modifier = Modifier
@@ -150,10 +138,7 @@ fun RemindersScreen(viewModel: AppViewModel) {
                                 reminder = reminder,
                                 index = reminders.indexOf(reminder),
                                 onYes = {
-                                    reminders = reminders.map {
-                                        if (it.id == reminder.id) it.copy(isCompleted = true)
-                                        else it
-                                    }
+                                    viewModel.toggleReminderCompletion(reminder.id)
                                 },
                                 onNo = {
                                     selectedReminder = reminder
@@ -172,10 +157,7 @@ fun RemindersScreen(viewModel: AppViewModel) {
                 showCompletedSection = showCompletedSection,
                 onToggle = { showCompletedSection = !showCompletedSection },
                 onUncomplete = { reminder ->
-                    reminders = reminders.map {
-                        if (it.id == reminder.id) it.copy(isCompleted = false)
-                        else it
-                    }
+                    viewModel.uncompleteReminder(reminder.id)
                 }
             )
         }
@@ -247,10 +229,7 @@ fun RemindersScreen(viewModel: AppViewModel) {
                     Button(
                         onClick = {
                             // Log the alternate food/activity and mark as completed
-                            reminders = reminders.map {
-                                if (it.id == selectedReminder?.id) it.copy(isCompleted = true)
-                                else it
-                            }
+                            viewModel.toggleReminderCompletion(selectedReminder?.id ?: -1)
                             showDialog = false
                             alternateFood = ""
                         },
