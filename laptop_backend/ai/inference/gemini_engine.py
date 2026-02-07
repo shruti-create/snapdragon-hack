@@ -16,7 +16,6 @@ logger = logging.getLogger('ai')
 class GeminiEngine:
     """
     Inference engine using Google's Gemini API.
-    Drop-in replacement for the Ollama engine with the same interface.
     """
 
     _instance = None
@@ -241,20 +240,3 @@ def get_gemini_engine() -> GeminiEngine:
         Initialized GeminiEngine instance
     """
     return GeminiEngine()
-
-
-# Aliases for backward compatibility
-def get_ollama_engine() -> GeminiEngine:
-    """
-    Backward-compatible alias for get_gemini_engine.
-    Routes using get_ollama_engine() will work without changes.
-    """
-    return get_gemini_engine()
-
-
-def get_npu_engine() -> GeminiEngine:
-    """
-    Backward-compatible alias for get_gemini_engine.
-    Routes using get_npu_engine() will work without changes.
-    """
-    return get_gemini_engine()

@@ -38,13 +38,14 @@ def create_app():
     app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
     
     # Register blueprints
-    from routes import auth_bp, user_bp, plan_bp, tracking_bp, user_ai_bp
-    
+    from routes import auth_bp, user_bp, plan_bp, tracking_bp, user_ai_bp, agents_bp
+
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(plan_bp)
     app.register_blueprint(tracking_bp)
     app.register_blueprint(user_ai_bp)  # AI-enhanced health & nutrition endpoints
+    app.register_blueprint(agents_bp)  # Fitness & nutrition agents
     
     # Health check endpoint
     @app.route('/health', methods=['GET'])

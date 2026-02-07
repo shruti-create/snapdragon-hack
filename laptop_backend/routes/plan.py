@@ -1,6 +1,6 @@
 """
 AI-Enhanced Plan Management Blueprint
-Uses Ollama LLM for intelligent plan generation
+Uses Gemini LLM for intelligent plan generation
 """
 
 from flask import Blueprint, jsonify, request
@@ -12,7 +12,7 @@ load_dotenv()
 from services.plan_service import create_plan, get_plan, update_plan, delete_plan
 from services.health_service import get_health_data
 from services.nutrition_service import get_nutrition_data
-from ai import get_ollama_engine
+from ai import get_gemini_engine
 from ai.prompts import plan_prompts
 from ai.utils.model_utils import format_response, merge_user_context, format_error_response
 
@@ -25,7 +25,7 @@ plan_bp = Blueprint('plan', __name__, url_prefix='/users')
 @plan_bp.route('/<user_id>/plan', methods=['POST'])
 def create_user_plan_ai(user_id):
     """
-    Create a new diet/workout plan using Ollama LLM.
+    Create a new diet/workout plan using Gemini LLM.
 
     Request Body:
         {
@@ -59,8 +59,8 @@ def create_user_plan_ai(user_id):
             ai_logger.info(f"AI_USAGE: Initiating AI plan generation - userId={user_id}, plan_type={plan_type}, weeks={duration_weeks}")
             start_time = time.time()
 
-            # Get Ollama engine instance
-            ollama_engine = get_ollama_engine()
+            # Get Gemini engine instance
+            ai_engine = get_gemini_engine()
 
             # Fetch user context
             health_response, health_status = get_health_data(user_id)
@@ -80,8 +80,8 @@ def create_user_plan_ai(user_id):
 
             ai_logger.info(f"AI_INFERENCE: Starting inference for userId={user_id}, plan_type={plan_type}")
 
-            # Generate plan using Ollama
-            raw_output = ollama_engine.generate(
+            # Generate plan using Gemini
+            raw_output = ai_engine.generate(
                 prompt=prompt,
                 max_new_tokens=1000,  # Reduced for faster response
                 temperature=0.7,
@@ -187,8 +187,8 @@ def validate_user_plan(user_id):
         )
 
         # Get AI analysis
-        ollama_engine = get_ollama_engine()
-        raw_output = ollama_engine.generate(
+        ai_engine = get_gemini_engine()
+        raw_output = ai_engine.generate(
             prompt=prompt,
             max_new_tokens=800,
             temperature=0.5,  # Lower temp for more consistent analysis
@@ -253,8 +253,8 @@ def adjust_user_plan(user_id):
         )
 
         # Get AI adjustments
-        ollama_engine = get_ollama_engine()
-        raw_output = ollama_engine.generate(
+        ai_engine = get_gemini_engine()
+        raw_output = ai_engine.generate(
             prompt=prompt,
             max_new_tokens=1500,
             temperature=0.7,
@@ -354,8 +354,8 @@ def adjust_workout_plan(user_id):
         )
 
         # Get AI adjustments
-        ollama_engine = get_ollama_engine()
-        raw_output = ollama_engine.generate(
+        ai_engine = get_gemini_engine()
+        raw_output = ai_engine.generate(
             prompt=prompt,
             max_new_tokens=800,
             temperature=0.7,
@@ -482,8 +482,8 @@ def adjust_nutrition_plan(user_id):
         )
 
         # Get AI adjustments
-        ollama_engine = get_ollama_engine()
-        raw_output = ollama_engine.generate(
+        ai_engine = get_gemini_engine()
+        raw_output = ai_engine.generate(
             prompt=prompt,
             max_new_tokens=1000,
             temperature=0.7,

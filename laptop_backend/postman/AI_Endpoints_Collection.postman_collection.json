@@ -5,8 +5,8 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "base_url", "value": "http://localhost:5000" },
-    { "key": "user_id", "value": "YOUR_USER_ID" }
+    { "key": "base_url", "value": "http://192.168.1.100:5000" },
+    { "key": "user_id", "value": "Lz1aVFHvNUd63jfjxJeN" }
   ],
   "item": [
     {
